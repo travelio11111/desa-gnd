@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /users/{allPaths=**} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Public collections for attendance feature
+    match /jamaah/{allPaths=**} { 
+      allow read: if true; 
+      allow write: if isSignedIn();
+    }
+    match /attendance/{allPaths=**} { 
+      allow read, create: if true; 
+      allow update, delete: if isSignedIn();
+    }
+
+    // Private collections (Dashboard only)
+    match /assets/{allPaths=**} { allow read, write: if isSignedIn(); }
+    match /activities/{allPaths=**} { allow read, write: if isSignedIn(); }
+    match /facility_stats/{allPaths=**} { allow read, write: if isSignedIn(); }
+    match /ub_shopping/{allPaths=**} { allow read, write: if isSignedIn(); }
+  }
+}
